@@ -10,7 +10,7 @@ from langchain.chains import RetrievalQA
 
 # ================= CONFIGURATION =================
 # 使用 Qwen API
-QWEN_API_KEY = "sk-AP6F9xfYrwdouNurkEpOobIWkFv8cC0E30A46CEC111F0BEC92E52BC8C0AB2"
+QWEN_API_KEY = os.environ.get("QWEN_API_KEY", "")
 
 # 设置环境变量
 os.environ["QWEN_API_KEY"] = QWEN_API_KEY
