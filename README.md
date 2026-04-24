@@ -1,79 +1,107 @@
-# APAI4011_Customer_Sentiment_Engine
+# Customer-Sentiment-Engine
 
-1. PROJECT OVERVIEW
--------------------
-This project is a RAG (Retrieval-Augmented Generation) based chatbot designed to assist startups. 
-It processes Trustpilot reviews, calculates a "Weighted Sentiment Score" for each review, 
-and uses the Qwen (Tongyi Qianwen) Large Language Model to answer strategic business questions.
+A RAG (Retrieval-Augmented Generation) chatbot that scrapes Trustpilot reviews, analyzes their sentiment, and helps startups identify market opportunities and craft customer responses — powered by ChromaDB and the Qwen LLM.
 
-Key features:
-- Identifies market pain points from competitor reviews.
-- Simulates customer service responses based on sentiment analysis.
-- Uses local vector storage (ChromaDB) for fast retrieval.
+## Pipeline Overview
 
-2. FILE STRUCTURE
--------------------
-[Source Code]
-- rag_chat_chainlit_new.py      : MAIN APPLICATION. Run this to start the chatbot.
-- build_db.py                   : Utility script to vectorise CSV data into ChromaDB.
-- sentiment_analysis.py         : Analyzes raw reviews and calculates the Weighted Score.
-- category_auto_crawler_advanced.py : Web crawler to fetch raw data from Trustpilot.
+```
+category_auto_crawler_advanced.py   →  Raw reviews (CSV)
+         ↓
+sentiment_analysis.py               →  Weighted Sentiment Scores (CSV)
+         ↓
+build_db.py                         →  ChromaDB vector database
+         ↓
+rag_chat_chainlit_new.py            →  Chatbot UI (Chainlit)
+```
 
-[Data Folders]
-- chroma_db/                    : Pre-built vector database (The "Brain" memory).
-- data_with_sentiment_score/    : Processed CSV files with weighted scores.
-- categories_data_big/        : Raw scraped data.
+## File Structure
 
-3. PREREQUISITES
--------------------
-Ensure you have Python 3.9 or higher installed.
+```
+├── rag_chat_chainlit_new.py          # MAIN APPLICATION — run this to start the chatbot
+├── build_db.py                       # Vectorises processed CSV data into ChromaDB
+├── sentiment_analysis.py             # Calculates Weighted Sentiment Score from raw reviews
+├── category_auto_crawler_advanced.py # Web crawler to fetch reviews from Trustpilot
+├── requirements.txt                  # Python dependencies
+├── chroma_db.zip                     # Pre-built vector database (ready to use)
+├── data_with_sentiment_score.zip     # Processed CSVs with sentiment scores
+└── categories_data_big.zip           # Raw scraped review data
+```
 
-You need to install the required Python libraries. Open your terminal/command prompt 
-in this folder and run the following command:
+## Requirements
 
-   pip install chainlit pandas langchain langchain-community langchain-openai langchain-core langchain-huggingface chromadb
+Python 3.9 or higher is required.
 
-4. HOW TO RUN THE CHATBOT (Quick Start)
----------------------------------------
-Since the database (`chroma_db`) is already pre-built in this package, 
-you can run the chatbot immediately.
+Install all dependencies with:
 
-1. Open your terminal or command prompt.
-2. Navigate to this project folder.
-3. Run the following command:
+```bash
+pip install -r requirements.txt
+```
 
+## Quick Start (Pre-built Database)
+
+The vector database (`chroma_db`) is pre-built and included. You can run the chatbot immediately:
+
+1. Unzip `chroma_db.zip` in the project folder.
+2. Install dependencies (see above).
+3. Set your Qwen API key as an environment variable:
+   ```bash
+   export QWEN_API_KEY="your-api-key-here"   # macOS/Linux
+   set QWEN_API_KEY=your-api-key-here         # Windows
+   ```
+4. Run the chatbot:
+   ```bash
    chainlit run rag_chat_chainlit_new.py -w
+   ```
+5. The browser will open automatically at `http://localhost:8000`.
 
-4. The browser should open automatically (http://localhost:8000). 
-   If not, copy the link into your browser.
+## Full Pipeline (From Scratch)
 
-5. HOW TO REBUILD THE DATABASE (Optional)
------------------------------------------
-If you have added new CSV files to the 'data_with_sentiment_score' folder 
-and want to update the chatbot's knowledge:
+If you want to collect fresh data and rebuild the database:
 
-1. Run the build script:
-   python build_db.py
+**Step 1 — Crawl Trustpilot reviews:**
+```bash
+python category_auto_crawler_advanced.py
+```
+Output: `categories_data_big/` folder with raw CSVs.
 
-2. Wait for the process to finish. It will update the 'chroma_db' folder.
-3. Restart the chatbot using the command in Section 4.
+**Step 2 — Run sentiment analysis:**
+```bash
+python sentiment_analysis.py
+```
+Output: `data_with_sentiment_score/` folder with scored CSVs.
 
-6. CONFIGURATION (API Key)
---------------------------
-The project is currently configured to use the Qwen API.
-The API Key is located inside `rag_chat_chainlit_new.py`.
+**Step 3 — Build the vector database:**
+```bash
+python build_db.py
+```
+Output: `chroma_db/` folder (vector store ready for the chatbot).
 
-If you need to change the API Key:
-1. Open `rag_chat_chainlit_new.py` in a text editor.
-2. Locate the line: `QWEN_API_KEY = "sk-..."`
-3. Replace the string with your new key.
+**Step 4 — Start the chatbot** (see Quick Start above).
 
-7. TROUBLESHOOTING
-------------------
-- Issue: "Module not found" error.
-  Solution: Ensure you have run the `pip install` command in Section 3.
+## Configuration
 
-- Issue: The chatbot does not reply.
-  Solution: Check your internet connection (API requires internet) or check if the API Key is valid.
+The chatbot uses the [Qwen (Tongyi Qianwen)](https://www.alibabacloud.com/product/tongyi-qianwen) API via an OpenAI-compatible endpoint.
 
-========================================================================
+Set your API key as an environment variable before running:
+```bash
+export QWEN_API_KEY="your-api-key-here"
+```
+
+To use a different model, edit the `model` field in `rag_chat_chainlit_new.py`:
+```python
+llm = ChatOpenAI(model="qwen-turbo", ...)
+```
+
+## What the Chatbot Can Do
+
+- **Market Research** — "What are the common complaints in the home services industry?"
+- **Competitor Analysis** — "Which brand has the best weighted score and why?"
+- **Customer Support** — "Draft a polite reply to this negative review."
+
+## Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| `Module not found` | Run `pip install -r requirements.txt` |
+| Chatbot does not reply | Check your `QWEN_API_KEY` environment variable and internet connection |
+| `Database not found` | Unzip `chroma_db.zip` or run `build_db.py` to rebuild it |

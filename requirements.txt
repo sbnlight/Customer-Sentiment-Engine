@@ -1,0 +1,12 @@
+chainlit
+pandas
+langchain
+langchain-openai
+langchain-community
+langchain-core
+langchain-huggingface
+chromadb
+nltk
+requests
+beautifulsoup4
+sentence-transformers
